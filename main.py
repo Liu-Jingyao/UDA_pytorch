@@ -52,22 +52,22 @@ def main(cfg, model_cfg):
     if cfg.uda_mode:
         unsup_criterion = nn.KLDivLoss(reduction='none')
         if cfg.mode == 'train':
-            data_iter['sup_data_iter'] = data.sup_data_iter()
-            data_iter['unsup_data_iter'] = data.unsup_data_iter()
+            data_iter['sup_iter'] = data.sup_data_iter()
+            data_iter['unsup_iter'] = data.unsup_data_iter()
         elif cfg.mode == 'train_eval':
-            data_iter['sup_data_iter'] = data.sup_data_iter()
-            data_iter['unsup_data_iter'] = data.unsup_data_iter()
-            data_iter['eval_data_iter'] = data.eval_data_iter()
+            data_iter['sup_iter'] = data.sup_data_iter()
+            data_iter['unsup_iter'] = data.unsup_data_iter()
+            data_iter['eval_iter'] = data.eval_data_iter()
         else:
-            data_iter['eval_data_iter'] = data.eval_data_iter()
+            data_iter['eval_iter'] = data.eval_data_iter()
     else:
         if cfg.mode == 'train':
-            data_iter['sup_data_iter'] = data.sup_data_iter()
+            data_iter['sup_iter'] = data.sup_data_iter()
         elif cfg.mode == 'train_eval':
-            data_iter['sup_data_iter'] = data.sup_data_iter()
-            data_iter['eval_data_iter'] = data.eval_data_iter()
+            data_iter['sup_iter'] = data.sup_data_iter()
+            data_iter['eval_iter'] = data.eval_data_iter()
         else:
-            data_iter['eval_data_iter'] = data.eval_data_iter()
+            data_iter['eval_iter'] = data.eval_data_iter()
     sup_criterion = nn.CrossEntropyLoss(reduction='none')
 
     # Load Model
