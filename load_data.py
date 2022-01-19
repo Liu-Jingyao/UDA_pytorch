@@ -232,6 +232,7 @@ class load_data:
         
         if cfg.uda_mode:                                    # Only uda_mode
             self.unsup_data_dir = cfg.unsup_data_dir
+            # todo
             self.unsup_batch_size = cfg.train_batch_size * cfg.unsup_ratio
 
     def sup_data_iter(self):
