@@ -74,7 +74,7 @@ def main(cfg, model_cfg):
     model = models.Classifier(model_cfg, len(data.TaskDataset.labels))
 
     # Create trainer
-    trainer = train.Trainer(cfg, model, data_iter, optim.optim4GPU(cfg, model), get_device(), cfg.mode)
+    trainer = train.Trainer(cfg, model, data_iter, optim.optim4GPU(cfg, model), get_device())
 
     # Training
     def get_loss(model, sup_batch, unsup_batch, global_step):
