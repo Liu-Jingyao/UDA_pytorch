@@ -111,7 +111,7 @@ class Trainer(object):
             if global_step % self.cfg.save_steps == 0:
                 self.save(global_step)
 
-            if get_acc and global_step % self.cfg.check_steps == 0 and global_step > 4999:
+            if get_acc and global_step % self.cfg.check_steps == 0:
                 results = self.eval(get_acc, None, model)
                 total_accuracy = torch.cat(results).mean().item()
                 logger.add_scalars('data/scalar_group', {'eval_acc': total_accuracy}, global_step)
