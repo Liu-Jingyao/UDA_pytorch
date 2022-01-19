@@ -195,7 +195,7 @@ class IMDB(CsvDataset):
 
     def get_sup(self, lines):
         for line in itertools.islice(lines, 0, None):
-            yield line[7], line[6], []    # label, text_a, None
+            yield line[0], line[1], []    # label, text_a, None
             # yield None, line[6], []
 
     def get_unsup(self, lines):
