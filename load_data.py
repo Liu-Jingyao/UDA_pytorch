@@ -226,8 +226,8 @@ class load_data:
             self.eval_batch_size = cfg.eval_batch_size
             self.shuffle = True
         elif cfg.mode == 'eval':
-            self.sup_data_dir = cfg.eval_data_dir
-            self.sup_batch_size = cfg.eval_batch_size
+            self.eval_data_dir = cfg.eval_data_dir
+            self.eval_batch_size = cfg.eval_batch_size
             self.shuffle = False                            # Not shuffel when eval mode
         
         if cfg.uda_mode:                                    # Only uda_mode
