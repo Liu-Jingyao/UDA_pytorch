@@ -18,7 +18,7 @@
     "uda_confidence_thresh": 0.45,
 
     "data_parallel": true,
-    "need_prepro": false,
+    "need_prepro": true,
     "sup_data_dir": "data/imdb_sup_train.txt",
     "unsup_data_dir": "data/imdb_unsup_train.txt",
     "eval_data_dir": "data/imdb_sup_test.txt",
@@ -29,7 +29,7 @@
     "task": "imdb",
 
     "save_steps": 100,
-    "check_steps": 250,
+    "check_steps": 50,
     "results_dir": "results",
 
     "is_position": false
