@@ -8,12 +8,12 @@
 
     "total_steps": 10000,
     "max_seq_length": 128,
-    "train_batch_size": 8,
-    "eval_batch_size": 16,
+    "train_batch_size": 32,
+    "eval_batch_size": 32,
 
-    "unsup_ratio": 3,
+    "unsup_ratio": 7,
     "uda_coeff": 1,
-    "tsa": "linear_schedule",
+    "tsa": "exp_schedule",
     "uda_softmax_temp": 0.85,
     "uda_confidence_thresh": 0.45,
 
