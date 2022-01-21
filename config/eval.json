@@ -7,6 +7,6 @@
     "need_prepro": false,
     "model_file": "results_045/save/model_steps_6250.pt",
     "eval_data_dir": "data/imdb_sup_test.txt",
-    "vocab":"BERT_Base_Uncased/vocab.txt",
+    "vocab":"BERT_Medium_Uncased/vocab.txt",
     "task": "imdb"
 }

@@ -17,8 +17,8 @@
     "eval_data_dir": "data/imdb_sup_test.txt",
 
     "model_file":null,
-    "pretrain_file":"BERT_Base_Uncased/bert_model.ckpt",
-    "vocab":"BERT_Base_Uncased/vocab.txt",
+    "pretrain_file":"BERT_Medium_Uncased/bert_model.ckpt",
+    "vocab":"BERT_Medium_Uncased/vocab.txt",
     "task": "imdb",
 
     "save_steps": 1000,
