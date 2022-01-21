@@ -52,7 +52,7 @@ class params(NamedTuple):
     # unsup
     unsup_ratio: int = 0                # unsup_batch_size = unsup_ratio * sup_batch_size
     uda_coeff: int = 1                  # total_loss = sup_loss + uda_coeff*unsup_loss
-    tsa: str = 'linear_schedule'           # log, linear, exp
+    tsa: str = 'exp_schedule'           # log, linear, exp
     uda_softmax_temp: float = -1        # 0 ~ 1
     uda_confidence_thresh: float = -1   # 0 ~ 1
 
