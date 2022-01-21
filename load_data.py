@@ -190,7 +190,7 @@ def dataset_class(task):
 
 class IMDB(CsvDataset):
     labels = ('0', '1')
-    def __init__(self, file, need_prepro, pipeline=[], max_len=128, mode='train', d_type='sup'):
+    def __init__(self, file, need_prepro, pipeline=[], max_len=512, mode='train', d_type='sup'):
         super().__init__(file, need_prepro, pipeline, max_len, mode, d_type)
 
     def get_sup(self, lines):

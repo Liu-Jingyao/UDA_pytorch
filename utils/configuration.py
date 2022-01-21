@@ -45,7 +45,7 @@ class params(NamedTuple):
     uda_mode: bool = False              # True, False
     
     total_steps: int = 100000           # total_steps >= n_epcohs * n_examples / 3
-    max_seq_length: int = 128
+    max_seq_length: int = 512
     train_batch_size: int = 32
     eval_batch_size: int = 8
 
