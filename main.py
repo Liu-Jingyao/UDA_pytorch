@@ -43,6 +43,11 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
 def main(cfg, model_cfg):
     # Load Configuration
     cfg = configuration.params.from_json(cfg)  # Train or Eval cfg
+    if cfg.mode == "prepro":
+        data = load_data(cfg)
+        sup_dataset, unsup_dataset, eval_dataset = data.get_all_dataset()
+        print(sup_dataset.tensors, sup_dataset.labels)
+
     model_cfg = configuration.model.from_json(model_cfg)  # BERT_cfg
     set_seeds(cfg.seed)
 

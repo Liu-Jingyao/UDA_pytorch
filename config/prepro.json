@@ -1,0 +1,16 @@
+{
+    "do_lower_case": true,
+    "mode": "prepro",
+    "max_seq_length": 512,
+    "uda_mode": false,
+
+    "data_parallel": true,
+    "need_prepro": true,
+    "sup_data_dir": "data/imdb_sup_train.txt",
+    "eval_data_dir": "data/imdb_sup_test.txt",
+
+    "vocab":"BERT_Medium_Uncased/vocab.txt",
+    "task": "imdb",
+
+    "is_position": false
+}

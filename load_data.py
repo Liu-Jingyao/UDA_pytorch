@@ -229,10 +229,17 @@ class load_data:
             self.eval_data_dir = cfg.eval_data_dir
             self.eval_batch_size = cfg.eval_batch_size
             self.shuffle = False                            # Not shuffel when eval mode
+        elif cfg.mode == 'prepro':
+            self.sup_data_dir = cfg.sup_data_dir
+            self.eval_data_dir = cfg.eval_data_dir
+            self.sup_batch_size = cfg.train_batch_size
+            self.eval_batch_size = cfg.eval_batch_size
+            self.unsup_data_dir = cfg.unsup_data_dir
+            self.unsup_batch_size = cfg.train_batch_size * cfg.unsup_ratio
+            self.shuffle = False
         
         if cfg.uda_mode:                                    # Only uda_mode
             self.unsup_data_dir = cfg.unsup_data_dir
-            # todo
             self.unsup_batch_size = cfg.train_batch_size * cfg.unsup_ratio
 
     def sup_data_iter(self):
@@ -252,3 +259,9 @@ class load_data:
         eval_data_iter = DataLoader(eval_dataset, batch_size=self.eval_batch_size, shuffle=False)
 
         return eval_data_iter
+
+    def get_all_dataset(self):
+        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, self.cfg.mode, 'sup')
+        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, self.cfg.mode, 'unsup')
+        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'eval', 'sup')
+        return sup_dataset, unsup_dataset, eval_dataset
