@@ -29,7 +29,7 @@
     "task": "imdb",
 
     "save_steps": 1000,
-    "check_steps": 100,
+    "check_steps": 500,
     "results_dir": "results",
 
     "is_position": false
