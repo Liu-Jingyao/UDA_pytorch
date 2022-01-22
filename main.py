@@ -46,8 +46,19 @@ def main(cfg, model_cfg):
     if cfg.mode == "prepro":
         data = load_data(cfg)
         sup_dataset, unsup_dataset, eval_dataset = data.get_all_dataset()
-        print(sup_dataset.tensors, sup_dataset.labels)
-
+        with open("data/sup_train_preproed", "w") as f1, open("data/unsup_train_preproed", "w") as f2, open("data/sup_test_preproed", "w") as f3:
+            f1.write("input_ids\tinput_mask\tinput_type_ids\tlabel_ids\n")
+            f3.write("input_ids\tinput_mask\tinput_type_ids\tlabel_ids\n")
+            f2.write("ori_input_ids\tori_input_mask\tori_input_type_ids\taug_input_ids\taug_input_mask\taug_input_type_ids\n")
+            for d in sup_dataset.data:
+                f1.write("%s\t%s\t%s\t%s\n" % (d[0], d[2], d[1], d[3]))
+            for d in eval_dataset.data:
+                f3.write("%s\t%s\t%s\t%s\n" % (d[0], d[2], d[1], d[3]))
+            for i in range(len(unsup_dataset.data['ori'])):
+                ori = unsup_dataset.data['ori'][i]
+                aug = unsup_dataset.data['aug'][i]
+                f2.write("%s\t%s\t%s\t%s\t%s\t%s\n" % (ori[0], ori[2], ori[1], aug[0], aug[2], aug[1]))
+        return
     model_cfg = configuration.model.from_json(model_cfg)  # BERT_cfg
     set_seeds(cfg.seed)
 

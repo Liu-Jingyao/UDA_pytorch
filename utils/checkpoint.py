@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 import torch
 
 def load_param(checkpoint_file, conversion_table):
@@ -22,7 +22,7 @@ def load_param(checkpoint_file, conversion_table):
     checkpoint_file : pretrained checkpoint model file in tensorflow
     cnoversion_table : { pytorch tensor in a model : checkpoint variable name }
     """
-
+    import tensorflow as tf
     for pyt_param, tf_param_name in conversion_table.items():
         tf_param = tf.train.load_variable(checkpoint_file, tf_param_name)
 

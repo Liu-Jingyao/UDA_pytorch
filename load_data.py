@@ -75,6 +75,9 @@ class CsvDataset(Dataset):
                     ori_tensor = [torch.tensor(x, dtype=torch.long) for x in zip(*data['ori'])]
                     aug_tensor = [torch.tensor(x, dtype=torch.long) for x in zip(*data['aug'])]
                     self.tensors = ori_tensor + aug_tensor
+            if mode == "prepro":
+                self.data = data
+
         # already preprocessed
         else:
             f = open(file, 'r', encoding='utf-8')
@@ -261,7 +264,7 @@ class load_data:
         return eval_data_iter
 
     def get_all_dataset(self):
-        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, self.cfg.mode, 'sup')
-        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, self.cfg.mode, 'unsup')
-        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'eval', 'sup')
+        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'prepro', 'sup')
+        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'prepro', 'unsup')
+        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'prepro', 'sup')
         return sup_dataset, unsup_dataset, eval_dataset
