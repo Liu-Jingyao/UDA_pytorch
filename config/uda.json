@@ -8,7 +8,7 @@
 
     "total_steps": 10000,
     "max_seq_length": 512,
-    "train_batch_size": 8,
+    "train_batch_size": 4,
     "eval_batch_size": 16,
 
     "unsup_ratio": 3,
@@ -29,7 +29,7 @@
     "task": "imdb",
 
     "save_steps": 1000,
-    "check_steps": 50,
+    "check_steps": 100,
     "results_dir": "results",
 
     "is_position": false
