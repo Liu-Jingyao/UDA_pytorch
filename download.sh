@@ -18,10 +18,8 @@
 #wget storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip
 #unzip uncased_L-12_H-768_A-12.zip && rm uncased_L-12_H-768_A-12.zip
 #mv uncased_L-12_H-768_A-12 BERT_Base_Uncased
-#wget https://storage.googleapis.com/bert_models/2020_02_20/uncased_L-8_H-512_A-8.zip
-#unzip uncased_L-8_H-512_A-8.zip -d BERT_Medium_Uncased && rm uncased_L-8_H-512_A-8.zip
-wget https://storage.googleapis.com/bert_models/2020_02_20/uncased_L-8_H-128_A-2.zip
-unzip uncased_L-8_H-128_A-2.zip -d BERT_Medium_Uncased && rm uncased_L-8_H-128_A-2.zip
+wget https://storage.googleapis.com/bert_models/2020_02_20/uncased_L-8_H-512_A-8.zip
+unzip uncased_L-8_H-512_A-8.zip -d BERT_Medium_Uncased && rm uncased_L-8_H-512_A-8.zip
 
 # **** unzip data ****
 unzip data.zip && rm data.zip
