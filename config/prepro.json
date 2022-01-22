@@ -1,7 +1,7 @@
 {
     "do_lower_case": true,
     "mode": "prepro",
-    "max_seq_length": 512,
+    "max_seq_length": 128,
     "uda_mode": false,
 
     "data_parallel": true,

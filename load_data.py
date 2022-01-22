@@ -139,7 +139,7 @@ class Tokenizing(Pipeline):
 
 
 class AddSpecialTokensWithTruncation(Pipeline):
-    def __init__(self, max_len=512):
+    def __init__(self, max_len=128):
         super().__init__()
         self.max_len = max_len
     
@@ -159,7 +159,7 @@ class AddSpecialTokensWithTruncation(Pipeline):
 
 
 class TokenIndexing(Pipeline):
-    def __init__(self, indexer, labels, max_len=512):
+    def __init__(self, indexer, labels, max_len=128):
         super().__init__()
         self.indexer = indexer # function : tokens to indexes
         # map from a label name to a label index
@@ -193,7 +193,7 @@ def dataset_class(task):
 
 class IMDB(CsvDataset):
     labels = ('0', '1')
-    def __init__(self, file, need_prepro, pipeline=[], max_len=512, mode='train', d_type='sup'):
+    def __init__(self, file, need_prepro, pipeline=[], max_len=128, mode='train', d_type='sup'):
         super().__init__(file, need_prepro, pipeline, max_len, mode, d_type)
 
     def get_sup(self, lines):

@@ -45,7 +45,7 @@ class params(NamedTuple):
     uda_mode: bool = False              # True, False
     
     total_steps: int = 100000           # total_steps >= n_epcohs * n_examples / 3
-    max_seq_length: int = 512
+    max_seq_length: int = 128
     train_batch_size: int = 32
     eval_batch_size: int = 8
 
@@ -112,7 +112,7 @@ class model(NamedTuple):
     #activ_fn: str = "gelu" # Non-linear Activation Function Type in Hidden Layers
     p_drop_hidden: float = 0.1 # Probability of Dropout of various Hidden Layers
     p_drop_attn: float = 0.1 # Probability of Dropout of Attention Layers
-    max_len: int = 512 # Maximum Length for Positional Embeddings
+    max_len: int = 128 # Maximum Length for Positional Embeddings
     n_segments: int = 2 # Number of Sentence Segments
 
     @classmethod
