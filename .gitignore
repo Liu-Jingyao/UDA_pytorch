@@ -1,2 +1,9 @@
 BERT_Base_Uncased
 results_045
+/data/imdb_sup_test.txt
+/data/imdb_sup_train.txt
+/data/imdb_unsup_train.txt
+/data/sup_test_preproed
+/data/sup_train_preproed
+/data/unsup_train_preproed
+/uncased_L-12_H-768_A-12.zip
