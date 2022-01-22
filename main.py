@@ -46,7 +46,7 @@ def main(cfg, model_cfg):
     if cfg.mode == "prepro":
         data = load_data(cfg)
         sup_dataset, unsup_dataset, eval_dataset = data.get_all_dataset()
-        with open("data/sup_train_prepro.txt", "w") as f1, open("data/unsup_train_prepro.txt", "w") as f2, open("data/sup_test_prepro.txt", "w") as f3:
+        with open("data/imdb_sup_train_tokenized.txt", "w") as f1, open("data/imdb_unsup_train_tokenized.txt", "w") as f2, open("data/imdb_sup_test_tokenized.txt", "w") as f3:
             f1.write("input_ids\tinput_mask\tinput_type_ids\tlabel_ids\n")
             f3.write("input_ids\tinput_mask\tinput_type_ids\tlabel_ids\n")
             f2.write("ori_input_ids\tori_input_mask\tori_input_type_ids\taug_input_ids\taug_input_mask\taug_input_type_ids\n")
