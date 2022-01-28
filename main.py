@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
 
 import fire
 
@@ -20,6 +21,7 @@ import torch.nn.functional as F
 
 import models
 import train
+from augmentation import sent_level_augment, word_level_augment
 from load_data import load_data
 from utils.utils import set_seeds, get_device, _get_device, torch_device_one
 from utils import optim, configuration
@@ -40,16 +42,34 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
     return output.to(_get_device())
 
 
+def unsup_data_augmentation(cfg):
+    with open(cfg.unsup_data_dir, "r") as f:
+        ori_lines = f.readlines()
+    aug_lines = copy.deepcopy(ori_lines)
+    aug_lines = sent_level_augment.run_augment(aug_lines, cfg.aug_ops, cfg.aug_copy_num)
+    aug_lines = word_level_augment.run_augment(aug_lines, cfg.aug_ops, 1)
+    ori_aug_lines = [(ori_lines[i // cfg.aug_copy_num].rstrip(), aug_lines[i]) for i in range(len(aug_lines))]
+    return ori_aug_lines
+
+
 def main(cfg, model_cfg):
     # Load Configuration
     cfg = configuration.params.from_json(cfg)  # Train or Eval cfg
-    if cfg.mode == "prepro":
+    if cfg.mode == "augmentation":
+        ori_aug_lines = unsup_data_augmentation(cfg)
+        with open(cfg.unsup_data_dir + "_" + cfg.aug_copy_num + "aug") as f:
+            f.writelines(["%s\t%s\n" % (ori, aug) for ori, aug in ori_aug_lines])
+        return
+    if cfg.mode == "tokenize":
         data = load_data(cfg)
         sup_dataset, unsup_dataset, eval_dataset = data.get_all_dataset()
-        with open("data/imdb_sup_train_tokenized.txt", "w") as f1, open("data/imdb_unsup_train_tokenized.txt", "w") as f2, open("data/imdb_sup_test_tokenized.txt", "w") as f3:
+        with open("data/imdb_sup_train_tokenized.txt", "w") as f1, open("data/imdb_unsup_train_tokenized.txt",
+                                                                        "w") as f2, open(
+            "data/imdb_sup_test_tokenized.txt", "w") as f3:
             f1.write("input_ids\tinput_mask\tinput_type_ids\tlabel_ids\n")
             f3.write("input_ids\tinput_mask\tinput_type_ids\tlabel_ids\n")
-            f2.write("ori_input_ids\tori_input_mask\tori_input_type_ids\taug_input_ids\taug_input_mask\taug_input_type_ids\n")
+            f2.write(
+                "ori_input_ids\tori_input_mask\tori_input_type_ids\taug_input_ids\taug_input_mask\taug_input_type_ids\n")
             for d in sup_dataset.data:
                 f1.write("%s\t%s\t%s\t%s\n" % (d[0], d[2], d[1], d[3]))
             for d in eval_dataset.data:
@@ -125,7 +145,6 @@ def main(cfg, model_cfg):
             sup_loss = torch.mean(sup_loss)
 
         # unsup loss
-        # todo
         if unsup_batch:
             # ori
             with torch.no_grad():

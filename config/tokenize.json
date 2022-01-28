@@ -1,6 +1,6 @@
 {
     "do_lower_case": true,
-    "mode": "prepro",
+    "mode": "tokenize",
     "max_seq_length": 128,
     "uda_mode": false,
 

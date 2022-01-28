@@ -1,0 +1,13 @@
+{
+    "do_lower_case": true,
+    "mode": "augmentation",
+    "max_seq_length": 128,
+
+    "unsup_data_dir": "data/imdb_unsup_train.txt",
+    "vocab":"BERT_Medium_Uncased/vocab.txt",
+
+    "aug_ops": "bt-0.9",
+    "aug_copy_num": 1,
+
+    "is_position": false
+}

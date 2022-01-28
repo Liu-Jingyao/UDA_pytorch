@@ -64,6 +64,8 @@ class params(NamedTuple):
     eval_data_dir: str = None
     n_sup: int = None
     n_unsup: int = None
+    aug_ops: str = None
+    aug_copy_num: int = None
 
     model_file: str = None              # fine-tuned
     pretrain_file: str = None           # pre-trained

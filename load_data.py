@@ -31,6 +31,32 @@ from torch.utils.data import Dataset, DataLoader
 from utils import tokenization
 from utils.utils import truncate_tokens_pair
 
+def clean_web_text(st):
+  """clean text."""
+  st = st.replace("<br />", " ")
+  st = st.replace("&quot;", "\"")
+  st = st.replace("<p>", " ")
+  if "<a href=" in st:
+    # print("before:\n", st)
+    while "<a href=" in st:
+      start_pos = st.find("<a href=")
+      end_pos = st.find(">", start_pos)
+      if end_pos != -1:
+        st = st[:start_pos] + st[end_pos + 1:]
+      else:
+        print("incomplete href")
+        print("before", st)
+        st = st[:start_pos] + st[start_pos + len("<a href=")]
+        print("after", st)
+
+    st = st.replace("</a>", "")
+    # print("after\n", st)
+    # print("")
+  st = st.replace("\\n", " ")
+  st = st.replace("\\", " ")
+  # while "  " in st:
+  #   st = st.replace("  ", " ")
+  return st
 
 class CsvDataset(Dataset):
     labels = None
@@ -42,6 +68,7 @@ class CsvDataset(Dataset):
         if need_prepro:
             with open(file, 'r', encoding='utf-8') as f:
                 lines = csv.reader(f, delimiter='\t', quotechar='"')
+                lines = [clean_web_text(line) for line in lines]
 
                 # supervised dataset
                 if d_type == 'sup':
@@ -75,7 +102,7 @@ class CsvDataset(Dataset):
                     ori_tensor = [torch.tensor(x, dtype=torch.long) for x in zip(*data['ori'])]
                     aug_tensor = [torch.tensor(x, dtype=torch.long) for x in zip(*data['aug'])]
                     self.tensors = ori_tensor + aug_tensor
-            if mode == "prepro":
+            if mode == "tokenize":
                 self.data = data
 
         # already preprocessed
@@ -232,7 +259,7 @@ class load_data:
             self.eval_data_dir = cfg.eval_data_dir
             self.eval_batch_size = cfg.eval_batch_size
             self.shuffle = False                            # Not shuffel when eval mode
-        elif cfg.mode == 'prepro':
+        elif cfg.mode == 'tokenize':
             self.sup_data_dir = cfg.sup_data_dir
             self.eval_data_dir = cfg.eval_data_dir
             self.sup_batch_size = cfg.train_batch_size
@@ -240,7 +267,7 @@ class load_data:
             self.unsup_data_dir = cfg.unsup_data_dir
             self.unsup_batch_size = cfg.train_batch_size * cfg.unsup_ratio
             self.shuffle = False
-        
+
         if cfg.uda_mode:                                    # Only uda_mode
             self.unsup_data_dir = cfg.unsup_data_dir
             self.unsup_batch_size = cfg.train_batch_size * cfg.unsup_ratio
@@ -264,7 +291,7 @@ class load_data:
         return eval_data_iter
 
     def get_all_dataset(self):
-        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'prepro', 'sup')
-        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'prepro', 'unsup')
-        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'prepro', 'sup')
+        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'sup')
+        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'unsup')
+        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'sup')
         return sup_dataset, unsup_dataset, eval_dataset
