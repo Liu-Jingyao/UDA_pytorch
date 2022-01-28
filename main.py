@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
+from math import ceil
 
 import fire
 
@@ -45,7 +46,7 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
 def unsup_data_augmentation(cfg):
     with open(cfg.unsup_data_dir, "r") as f:
         ori_lines = f.readlines()
-        data_per_worker = int(len(ori_lines) / cfg.replicas + 0.5)
+        data_per_worker = ceil(len(ori_lines) / cfg.replicas)
         start = cfg.worker_id * data_per_worker
         end = min(start + data_per_worker, len(ori_lines))
         ori_lines = ori_lines[start:end]
@@ -62,7 +63,8 @@ def main(cfg, model_cfg):
     cfg = configuration.params.from_json(cfg)  # Train or Eval cfg
     if cfg.mode == "augmentation":
         ori_aug_lines = unsup_data_augmentation(cfg)
-        with open("/data/imdb_unsup_train_%daug_%d/%d.txt" % (cfg.aug_copy_num, cfg.worker_id, cfg.replicas), "w") as f:
+        with open("/data/imdb_unsup_train_%daug_%din%d.txt" % (cfg.aug_copy_num, cfg.worker_id, cfg.replicas),
+                  "w") as f:
             f.writelines(["%s\t%s\n" % (ori, aug) for ori, aug in ori_aug_lines])
         return
     if cfg.mode == "tokenize":

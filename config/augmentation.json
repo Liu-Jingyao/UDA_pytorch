@@ -8,6 +8,6 @@
     "aug_copy_num": 1,
     "aug_batch_size": 16,
 
-    "replicas": 20,
+    "replicas": 1,
     "worker_id": 0
 }

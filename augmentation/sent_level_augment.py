@@ -1,4 +1,5 @@
 import os
+from math import ceil
 
 import torch
 import transformers
@@ -16,7 +17,7 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
     fr_en_tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en", cache_dir='./augmentation/HFCache/')
     fr_en_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-fr-en",
                                                 cache_dir='./augmentation/HFCache/').cuda()
-    batch_num = int(len(ori_lines) / aug_batch_size + 0.5)
+    batch_num = ceil(len(ori_lines) / aug_batch_size)
     print("Translating origin data to French...")
     fr_lines = []
     for i in tqdm(range(batch_num)):
@@ -24,7 +25,7 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
         end = min(start + aug_batch_size, len(ori_lines))
         translated_tokens = en_fr_model.generate(
             **{k: v.cuda() for k, v in
-               en_fr_tokenizer(ori_lines[start:end], return_tensors="pt", padding=True, max_length=512).items()},
+               en_fr_tokenizer(ori_lines[start:end], return_tensors="pt", padding=True, truncation=True, max_length=512).items()},
             do_sample=True,
             top_k=10,
             top_p=0.95,
@@ -39,7 +40,7 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
         start = i * aug_batch_size
         end = min(start + aug_batch_size, len(fr_lines))
         bt_tokens = fr_en_model.generate(
-            **{k: v.cuda() for k, v in fr_en_tokenizer(fr_lines[start:end], return_tensors="pt", padding=True, max_length=512).items()},
+            **{k: v.cuda() for k, v in fr_en_tokenizer(fr_lines[start:end], return_tensors="pt", padding=True, truncation=True, max_length=512).items()},
             do_sample=True,
             top_k=10,
             top_p=0.95,
