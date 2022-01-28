@@ -9,8 +9,6 @@ def back_translation(ori_lines, aug_ops, aug_copy_num):
     bt_args = aug_ops.split("-")
     temp = float(bt_args[1])
     torch.cuda.empty_cache()
-    transformers.logging.set_verbosity_info()
-    transformers.logging.enable_progress_bar()
     en_fr_tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-fr", cache_dir='./augmentation/HFCache/')
     en_fr_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-en-fr",
                                                 cache_dir='./augmentation/HFCache/').cuda()

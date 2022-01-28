@@ -7,5 +7,6 @@
     "aug_ops": "bt-0.9",
     "aug_copy_num": 1,
 
-    "is_position": false
+    "replicas": 20,
+    "worker_id": 0
 }

@@ -45,6 +45,11 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
 def unsup_data_augmentation(cfg):
     with open(cfg.unsup_data_dir, "r") as f:
         ori_lines = f.readlines()
+        data_per_worker = int(len(ori_lines) / cfg.replicas + 0.5)
+        start = cfg.worker_id * data_per_worker
+        end = min(start + data_per_worker, len(ori_lines))
+        ori_lines = ori_lines[start:end]
+        print("processing data from %d to %d" % (start, end - 1))
     aug_lines = copy.deepcopy(ori_lines)
     aug_lines = sent_level_augment.run_augment(aug_lines, cfg.aug_ops, cfg.aug_copy_num)
     aug_lines = word_level_augment.run_augment(aug_lines, cfg.aug_ops, 1)

@@ -66,6 +66,8 @@ class params(NamedTuple):
     n_unsup: int = None
     aug_ops: str = None
     aug_copy_num: int = None
+    replicas: int = 0
+    worker_id: int = 0
 
     model_file: str = None              # fine-tuned
     pretrain_file: str = None           # pre-trained
