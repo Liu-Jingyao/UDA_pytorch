@@ -68,6 +68,7 @@ class params(NamedTuple):
     aug_copy_num: int = None
     replicas: int = 0
     worker_id: int = 0
+    aug_batch_size: int = 16
 
     model_file: str = None              # fine-tuned
     pretrain_file: str = None           # pre-trained
