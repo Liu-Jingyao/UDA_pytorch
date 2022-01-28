@@ -57,7 +57,7 @@ def main(cfg, model_cfg):
     cfg = configuration.params.from_json(cfg)  # Train or Eval cfg
     if cfg.mode == "augmentation":
         ori_aug_lines = unsup_data_augmentation(cfg)
-        with open(cfg.unsup_data_dir + "_" + cfg.aug_copy_num + "aug") as f:
+        with open("/data/imdb_unsup_train_" + str(cfg.aug_copy_num) + "aug.txt", "w") as f:
             f.writelines(["%s\t%s\n" % (ori, aug) for ori, aug in ori_aug_lines])
         return
     if cfg.mode == "tokenize":
