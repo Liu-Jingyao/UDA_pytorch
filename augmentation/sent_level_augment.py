@@ -31,13 +31,13 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
                                 device=0)
     fr_lines = []
     for out in tqdm(en_fr_translator(data_iter(ori_lines)), total=len(ori_lines)):
-        fr_lines.append(out["translation_text"])
+        fr_lines.append(out[0]["translation_text"])
     print("Translating French data back to English...")
     fr_en_translator = pipeline("translation", model=fr_en_model, tokenizer=fr_en_tokenizer, model_kwargs=model_args,
                                 device=0)
     aug_lines = []
     for out in tqdm(fr_en_translator(data_iter(fr_lines)), total=len(fr_lines)):
-        aug_lines.append(out["translation_text"])
+        aug_lines.append(out[0]["translation_text"])
     return aug_lines
 
 
