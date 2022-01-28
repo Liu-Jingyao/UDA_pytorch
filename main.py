@@ -52,7 +52,7 @@ def unsup_data_augmentation(cfg):
         ori_lines = ori_lines[start:end]
         print("processing data from %d to %d" % (start, end - 1))
     aug_lines = copy.deepcopy(ori_lines)
-    aug_lines = sent_level_augment.run_augment(aug_lines, cfg.aug_ops, cfg.aug_copy_num, cfg.aug_batch_size)
+    aug_lines = sent_level_augment.run_augment(aug_lines, cfg.aug_ops, cfg.aug_copy_num, cfg.aug_batch_size, cfg.max_seq_length)
     aug_lines = word_level_augment.run_augment(aug_lines, cfg.aug_ops, 1)
     ori_aug_lines = [(ori_lines[i // cfg.aug_copy_num].rstrip(), aug_lines[i]) for i in range(len(aug_lines))]
     return ori_aug_lines
@@ -63,7 +63,7 @@ def main(cfg, model_cfg):
     cfg = configuration.params.from_json(cfg)  # Train or Eval cfg
     if cfg.mode == "augmentation":
         ori_aug_lines = unsup_data_augmentation(cfg)
-        with open("/data/imdb_unsup_train_%daug_%din%d.txt" % (cfg.aug_copy_num, cfg.worker_id, cfg.replicas),
+        with open("data/imdb_unsup_train_%daug_%din%d.txt" % (cfg.aug_copy_num, cfg.worker_id, cfg.replicas),
                   "w") as f:
             f.writelines(["%s\t%s\n" % (ori, aug) for ori, aug in ori_aug_lines])
         return

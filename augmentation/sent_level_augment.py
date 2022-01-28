@@ -7,7 +7,7 @@ from tqdm import tqdm
 from transformers import MarianMTModel, MarianTokenizer, pipeline
 
 
-def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
+def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
     bt_args = aug_ops.split("-")
     temp = float(bt_args[1])
     torch.cuda.empty_cache()
@@ -25,10 +25,10 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
         end = min(start + aug_batch_size, len(ori_lines))
         translated_tokens = en_fr_model.generate(
             **{k: v.cuda() for k, v in
-               en_fr_tokenizer(ori_lines[start:end], return_tensors="pt", padding=True, truncation=True, max_length=512).items()},
+               en_fr_tokenizer(ori_lines[start:end], return_tensors="pt", padding=True, truncation=True, max_length=max_len).items()},
             do_sample=True,
-            top_k=10,
-            top_p=0.95,
+            top_k=5,
+            top_p=0.70,
             temperature=temp,
             num_return_sequences=aug_copy_num
         )
@@ -52,10 +52,10 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
     return aug_lines
 
 
-def run_augment(ori_lines, aug_ops, aug_copy_num, aug_batch_size):
+def run_augment(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
     if aug_ops:
         if aug_ops.startswith("bt"):
-            aug_lines = back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size)
+            aug_lines = back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len)
         else:
             pass
     return aug_lines
