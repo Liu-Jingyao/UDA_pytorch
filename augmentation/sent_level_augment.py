@@ -41,7 +41,7 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
     for i in tqdm(range(batch_num)):
         start = i * aug_batch_size
         end = min(start + aug_batch_size, len(fr_lines))
-        in_en = fr_en_translator(fr_lines[start:end])
+        in_en = fr_en_translator(ori_lines[start:end])
         aug_lines.extend(in_en)
     return aug_lines
 
