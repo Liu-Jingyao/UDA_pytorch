@@ -6,8 +6,35 @@ import transformers
 from tqdm import tqdm
 from transformers import MarianMTModel, MarianTokenizer, pipeline
 
+def clean_web_text(st):
+  """clean text."""
+  st = st.replace("<br />", " ")
+  st = st.replace("&quot;", "\"")
+  st = st.replace("<p>", " ")
+  if "<a href=" in st:
+    # print("before:\n", st)
+    while "<a href=" in st:
+      start_pos = st.find("<a href=")
+      end_pos = st.find(">", start_pos)
+      if end_pos != -1:
+        st = st[:start_pos] + st[end_pos + 1:]
+      else:
+        print("incomplete href")
+        print("before", st)
+        st = st[:start_pos] + st[start_pos + len("<a href=")]
+        print("after", st)
+
+    st = st.replace("</a>", "")
+    # print("after\n", st)
+    # print("")
+  st = st.replace("\\n", " ")
+  st = st.replace("\\", " ")
+  # while "  " in st:
+  #   st = st.replace("  ", " ")
+  return st
 
 def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
+    ori_lines = [clean_web_text(d) for d in ori_lines]
     bt_args = aug_ops.split("-")
     temp = float(bt_args[1])
     torch.cuda.empty_cache()

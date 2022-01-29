@@ -42,7 +42,6 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
     output = threshold * (end - start) + start
     return output.to(_get_device())
 
-
 def unsup_data_augmentation(cfg):
     with open(cfg.unsup_data_dir, "r") as f:
         ori_lines = f.readlines()
