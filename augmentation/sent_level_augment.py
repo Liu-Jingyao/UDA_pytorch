@@ -34,7 +34,7 @@ def clean_web_text(st):
   return st
 
 def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
-    ori_lines = [clean_web_text(d) for d in ori_lines]
+    ori_lines = [clean_web_text(d)[-max_len:] for d in ori_lines]
     bt_args = aug_ops.split("-")
     temp = float(bt_args[1])
     torch.cuda.empty_cache()
