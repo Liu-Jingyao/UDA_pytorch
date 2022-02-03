@@ -58,8 +58,8 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
         end = min(start + aug_batch_size, len(ori_lines))
         in_fr = en_fr_translator(ori_lines[start:end],
                                  do_sample=True,
-                                 top_k=5,
-                                 top_p=0.7,
+                                 top_k=50,
+                                 top_p=0.95,
                                  temperature=temp,
                                  num_return_sequences=aug_copy_num)
         fr_lines.extend([d["translation_text"] for d in in_fr])
@@ -70,8 +70,8 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
         end = min(start + aug_batch_size, len(fr_lines))
         in_en = fr_en_translator(ori_lines[start:end],
                                  do_sample=True,
-                                 top_k=5,
-                                 top_p=0.7,
+                                 top_k=50,
+                                 top_p=0.95,
                                  temperature=temp,
                                  num_return_sequences=aug_copy_num)
         aug_lines.extend([d["translation_text"] for d in in_en])
