@@ -7,7 +7,7 @@
     "aug_ops": "bt-0.9",
     "aug_copy_num": 1,
     "aug_batch_size": 32,
-    "max_seq_length": 128,
+    "max_seq_length": 512,
 
     "replicas": 1,
     "worker_id": 0

@@ -1,7 +1,7 @@
 {
     "do_lower_case": true,
     "mode": "tokenize",
-    "max_seq_length": 128,
+    "max_seq_length": 512,
     "uda_mode": false,
 
     "data_parallel": true,

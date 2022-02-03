@@ -38,7 +38,7 @@ class Config(NamedTuple):
     #activ_fn: str = "gelu" # Non-linear Activation Function Type in Hidden Layers
     p_drop_hidden: float = 0.1 # Probability of Dropout of various Hidden Layers
     p_drop_attn: float = 0.1 # Probability of Dropout of Attention Layers
-    max_len: int = 128 # Maximum Length for Positional Embeddings
+    max_len: int = 512 # Maximum Length for Positional Embeddings
     n_segments: int = 2 # Number of Sentence Segments
 
     @classmethod

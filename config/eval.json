@@ -1,6 +1,6 @@
 {
     "mode": "eval",
-    "max_seq_length": 128,
+    "max_seq_length": 512,
     "eval_batch_size": 16,
     "do_lower_case": true,
     "data_parallel": true,
