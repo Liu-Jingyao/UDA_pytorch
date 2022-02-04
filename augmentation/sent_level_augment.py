@@ -34,7 +34,8 @@ def clean_web_text(st):
   return st
 
 def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
-    ori_lines = [clean_web_text(d)[-max_len:] for d in ori_lines]
+    ori_lines = [clean_web_text(d) for d in ori_lines]
+    ori_lines = [" ".join(d.split(" ")[-max_len:]) for d in ori_lines]
     bt_args = aug_ops.split("-")
     temp = float(bt_args[1])
     torch.cuda.empty_cache()
@@ -42,39 +43,39 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
                                                       model_max_length=max_len)
     en_fr_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-en-fr",
                                                 cache_dir='./augmentation/HFCache/').cuda()
-    en_fr_translator = pipeline("translation", model=en_fr_model, tokenizer=en_fr_tokenizer, device=0, truncation=True,
-                                max_length=512)
     fr_en_tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-fr-en", cache_dir='./augmentation/HFCache/',
                                                       model_max_length=max_len)
     fr_en_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-fr-en",
                                                 cache_dir='./augmentation/HFCache/').cuda()
-    fr_en_translator = pipeline("translation", model=fr_en_model, tokenizer=fr_en_tokenizer, device=0, truncation=True,
-                                max_length=512)
     batch_num = ceil(len(ori_lines) / aug_batch_size)
     print("Translating origin data to French...")
     fr_lines = []
     for i in tqdm(range(batch_num)):
         start = i * aug_batch_size
         end = min(start + aug_batch_size, len(ori_lines))
-        in_fr = en_fr_translator(ori_lines[start:end],
-                                 do_sample=True,
-                                 top_k=50,
-                                 top_p=0.95,
-                                 temperature=temp,
-                                 num_return_sequences=aug_copy_num)
-        fr_lines.extend([d["translation_text"] for d in in_fr])
+        translated_tokens = en_fr_model.generate(
+            **{k: v.cuda() for k, v in
+               en_fr_tokenizer(ori_lines[start:end], return_tensors="pt", padding=True, truncation=True, max_length=max_len).items()},
+            do_sample=True,
+            top_k=10,
+            temperature=temp,
+        )
+        in_fr = [en_fr_tokenizer.decode(t, skip_special_tokens=True) for t in translated_tokens]
+        fr_lines.extend(in_fr)
     print("Translating French data back to English...")
     aug_lines = []
     for i in tqdm(range(batch_num)):
         start = i * aug_batch_size
         end = min(start + aug_batch_size, len(fr_lines))
-        in_en = fr_en_translator(ori_lines[start:end],
-                                 do_sample=True,
-                                 top_k=50,
-                                 top_p=0.95,
-                                 temperature=temp,
-                                 num_return_sequences=aug_copy_num)
-        aug_lines.extend([d["translation_text"] for d in in_en])
+        bt_tokens = fr_en_model.generate(
+            **{k: v.cuda() for k, v in
+               fr_en_tokenizer(ori_lines[start:end], return_tensors="pt", padding=True, truncation=True, max_length=max_len).items()},
+            do_sample=True,
+            top_k=10,
+            temperature=temp,
+        )
+        in_en = [fr_en_tokenizer.decode(t, skip_special_tokens=True) for t in bt_tokens]
+        aug_lines.extend(in_en)
     return aug_lines
 
 

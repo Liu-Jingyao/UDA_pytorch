@@ -13,7 +13,7 @@
 
     "unsup_ratio": 3,
     "uda_coeff": 1,
-    "tsa": "exp_schedule",
+    "tsa": "linear_schedule",
     "uda_softmax_temp": 0.85,
     "uda_confidence_thresh": 0.45,
 
@@ -29,7 +29,7 @@
     "task": "imdb",
 
     "save_steps": 1000,
-    "check_steps": 500,
+    "check_steps": 1000,
     "results_dir": "results",
 
     "is_position": false

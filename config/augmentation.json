@@ -4,9 +4,9 @@
 
     "unsup_data_dir": "data/imdb_unsup_train.txt",
 
-    "aug_ops": "bt-0.9",
+    "aug_ops": "bt-2.0",
     "aug_copy_num": 1,
-    "aug_batch_size": 32,
+    "aug_batch_size": 16,
     "max_seq_length": 512,
 
     "replicas": 1,
