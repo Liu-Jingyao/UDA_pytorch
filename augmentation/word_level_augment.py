@@ -5,34 +5,13 @@ import math
 import string
 import numpy as np
 import re
+from string import punctuation
 
 printable = set(string.printable)
 
 
 def filter_unicode(st):
     return "".join([c for c in st if c in printable])
-
-
-def get_only_chars(line):
-    clean_line = ""
-
-    line = line.replace("’", "")
-    line = line.replace("'", "")
-    line = line.replace("-", " ")  # replace hyphens with spaces
-    line = line.replace("\t", " ")
-    line = line.replace("\n", " ")
-    line = line.lower()
-
-    for char in line:
-        if char in 'qwertyuiopasdfghjklzxcvbnm ':
-            clean_line += char
-        else:
-            clean_line += ' '
-
-    clean_line = re.sub(' +', ' ', clean_line)  # delete extra spaces
-    if clean_line[0] == ' ':
-        clean_line = clean_line[1:]
-    return clean_line
 
 
 def build_vocab(data):
@@ -168,6 +147,8 @@ class TfIdfWordRep(EfficientRandomGen):
     def replace_tokens(self, word_list, replace_prob):
         """Replace tokens in a sentence."""
         for i in range(len(word_list)):
+            if word_list[i] in punctuation:
+                continue
             if self.get_random_prob() < replace_prob[i]:
                 word_list[i] = self.get_random_token()
         return word_list
@@ -184,16 +165,17 @@ class TfIdfWordRep(EfficientRandomGen):
             filter_unicode(" ".join(self.token_list))))
 
 
-def run_augment(ori_lines, aug_ops, aug_copy_num):
+def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
     if aug_ops:
         if aug_ops.startswith("tf_idf"):
-            data = [get_only_chars(sup).strip().split(" ") for sup in ori_lines]
-            data_stats = get_data_stats(data)
+            aug_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
+            # data = [get_only_chars(sup).strip().split(" ") for sup in ori_lines]
+            data_stats = get_data_stats(aug_lines)
 
             print("\n>>Using augmentation {}".format(aug_ops))
             token_prob = float(aug_ops.split("-")[1])
             op = TfIdfWordRep(token_prob, data_stats)
-            for i in range(len(data)):
-                data[i] = op(data[i])
-            return data
+            for i in range(len(aug_lines)):
+                aug_lines[i] = " ".join(op(aug_lines[i]))
+            return aug_lines
     return ori_lines

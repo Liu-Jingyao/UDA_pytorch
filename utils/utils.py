@@ -134,3 +134,30 @@ class output_logging(object):
             elif self.mode == 'test':
                 for p, s in zip(pred, sentence):
                     self.wr.writerow([int(p), s])
+
+def clean_web_text(st):
+  """clean text."""
+  st = st.replace("<br />", " ")
+  st = st.replace("&quot;", "\"")
+  st = st.replace("<p>", " ")
+  if "<a href=" in st:
+    # print("before:\n", st)
+    while "<a href=" in st:
+      start_pos = st.find("<a href=")
+      end_pos = st.find(">", start_pos)
+      if end_pos != -1:
+        st = st[:start_pos] + st[end_pos + 1:]
+      else:
+        print("incomplete href")
+        print("before", st)
+        st = st[:start_pos] + st[start_pos + len("<a href=")]
+        print("after", st)
+
+    st = st.replace("</a>", "")
+    # print("after\n", st)
+    # print("")
+  st = st.replace("\\n", " ")
+  st = st.replace("\\", " ")
+  # while "  " in st:
+  #   st = st.replace("  ", " ")
+  return st
