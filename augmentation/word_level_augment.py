@@ -168,14 +168,16 @@ class TfIdfWordRep(EfficientRandomGen):
 def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
     if aug_ops:
         if aug_ops.startswith("tf_idf"):
-            aug_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
+            ori_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
             # data = [get_only_chars(sup).strip().split(" ") for sup in ori_lines]
-            data_stats = get_data_stats(aug_lines)
+            data_stats = get_data_stats(ori_lines)
 
             print("\n>>Using augmentation {}".format(aug_ops))
             token_prob = float(aug_ops.split("-")[1])
             op = TfIdfWordRep(token_prob, data_stats)
-            for i in range(len(aug_lines)):
-                aug_lines[i] = " ".join(op(aug_lines[i]))
+
+            aug_lines = []
+            for i in range(len(ori_lines) * aug_copy_num):
+                aug_lines.append(" ".join(op(ori_lines[i // aug_copy_num])))
             return aug_lines
     return ori_lines
