@@ -130,7 +130,7 @@ class TfIdfWordRep(EfficientRandomGen):
             show_data = False
         all_words = copy.deepcopy(data)
 
-        if show_data:
+        # if show_data:
             # print("before tf_idf_unif aug: {:s}".format(
             #     filter_unicode(" ".join(all_words))))
 
@@ -140,8 +140,8 @@ class TfIdfWordRep(EfficientRandomGen):
             replace_prob[:len(data)]
         )
 
-        if show_data:
-            all_words = copy.deepcopy(data)
+        # if show_data:
+        #     all_words = copy.deepcopy(data)
             # print("after tf_idf_unif aug: {:s}".format(
             #     filter_unicode(" ".join(all_words))))
         return data
