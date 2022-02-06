@@ -33,7 +33,8 @@ def get_data_stats(data):
     """Compute the IDF score for each word. Then compute the TF-IDF score."""
     word_doc_freq = collections.defaultdict(int)
     # Compute IDF
-    for i in range(len(data)):
+    print("computing IDF")
+    for i in tqdm(range(len(data))):
         cur_word_dict = {}
         cur_sent = copy.deepcopy(data[i])
         for word in cur_sent:
@@ -45,7 +46,8 @@ def get_data_stats(data):
         idf[word] = math.log(len(data) * 1. / word_doc_freq[word])
     # Compute TF-IDF
     tf_idf = {}
-    for i in range(len(data)):
+    print("computing TF-IDF")
+    for i in tqdm(range(len(data))):
         cur_word_dict = {}
         cur_sent = copy.deepcopy(data[i])
         for word in cur_sent:

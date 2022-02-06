@@ -5,7 +5,7 @@
     "unsup_data_dir": "data/imdb_unsup_train.txt",
 
     "aug_ops": "tf_idf-0.3",
-    "aug_copy_num": 3,
+    "aug_copy_num": 1,
     "aug_batch_size": 16,
     "max_seq_length": 512,
     "vocab":"BERT_Medium_Uncased/vocab.txt",
