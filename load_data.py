@@ -290,7 +290,10 @@ class load_data:
         return eval_data_iter
 
     def get_all_dataset(self):
+        print("tokenizing sup data...")
         sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'sup')
+        print("tokenizing unsup data...")
         unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'unsup')
+        print("tokenizing eval data...")
         eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'sup')
         return sup_dataset, unsup_dataset, eval_dataset

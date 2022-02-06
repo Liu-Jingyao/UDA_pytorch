@@ -7,6 +7,8 @@ import numpy as np
 import re
 from string import punctuation
 
+from tqdm import tqdm
+
 printable = set(string.printable)
 
 
@@ -166,6 +168,7 @@ class TfIdfWordRep(EfficientRandomGen):
 
 
 def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
+    print("word level augmentation using %s..." % aug_ops.split("-")[0])
     if aug_ops:
         if aug_ops.startswith("tf_idf"):
             ori_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
@@ -177,7 +180,7 @@ def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
             op = TfIdfWordRep(token_prob, data_stats)
 
             aug_lines = []
-            for i in range(len(ori_lines) * aug_copy_num):
+            for i in tqdm(range(len(ori_lines) * aug_copy_num)):
                 aug_lines.append(" ".join(op(ori_lines[i // aug_copy_num])))
             return aug_lines
     return ori_lines

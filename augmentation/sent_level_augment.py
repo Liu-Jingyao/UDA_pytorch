@@ -51,6 +51,7 @@ def back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
 
 
 def run_augment(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len):
+    print("sentence level augmentation using %s..." % aug_ops.split("-")[0])
     if aug_ops:
         if aug_ops.startswith("bt"):
             aug_lines = back_translation(ori_lines, aug_ops, aug_copy_num, aug_batch_size, max_len)
