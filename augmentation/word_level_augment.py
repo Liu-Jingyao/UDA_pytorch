@@ -131,8 +131,8 @@ class TfIdfWordRep(EfficientRandomGen):
         all_words = copy.deepcopy(data)
 
         if show_data:
-            print("before tf_idf_unif aug: {:s}".format(
-                filter_unicode(" ".join(all_words))))
+            # print("before tf_idf_unif aug: {:s}".format(
+            #     filter_unicode(" ".join(all_words))))
 
         replace_prob = self.get_replace_prob(all_words)
         data = self.replace_tokens(
@@ -142,8 +142,8 @@ class TfIdfWordRep(EfficientRandomGen):
 
         if show_data:
             all_words = copy.deepcopy(data)
-            print("after tf_idf_unif aug: {:s}".format(
-                filter_unicode(" ".join(all_words))))
+            # print("after tf_idf_unif aug: {:s}".format(
+            #     filter_unicode(" ".join(all_words))))
         return data
 
     def replace_tokens(self, word_list, replace_prob):
@@ -163,8 +163,8 @@ class TfIdfWordRep(EfficientRandomGen):
         for idx in token_list_idx:
             self.token_list += [self.tf_idf_keys[idx]]
         self.token_ptr = len(self.token_list) - 1
-        print("sampled token list: {:s}".format(
-            filter_unicode(" ".join(self.token_list))))
+        # print("sampled token list: {:s}".format(
+        #     filter_unicode(" ".join(self.token_list))))
 
 
 def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
