@@ -75,7 +75,8 @@ class CsvDataset(Dataset):
                         # sentences = []
                     data = []
 
-                    for instance in self.get_sup(lines):
+                    print("tokenizing sup/eval data...")
+                    for instance in tqdm(self.get_sup(lines)):
                         # if mode == 'eval':
                             # sentences.append([instance[1]])
                         for proc in pipeline:
@@ -89,7 +90,8 @@ class CsvDataset(Dataset):
                 # unsupervised dataset
                 elif d_type == 'unsup':
                     data = {'ori':[], 'aug':[]}
-                    for ori, aug in self.get_unsup(lines):
+                    print("tokenizing unsup data...")
+                    for ori, aug in tqdm(self.get_unsup(lines)):
                         for proc in pipeline:
                             ori = proc(ori, d_type)
                             aug = proc(aug, d_type)
