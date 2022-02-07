@@ -23,6 +23,7 @@ import collections
 import unicodedata
 import re
 import six
+from tqdm import tqdm
 
 
 def convert_to_unicode(text):

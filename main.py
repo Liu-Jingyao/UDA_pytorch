@@ -44,12 +44,10 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
     return output.to(_get_device())
 
 def unsup_data_augmentation(cfg):
-    nltk.download('punkt')
-    tokenizer = nltk.tokenize.word_tokenize
     with open(cfg.unsup_data_dir, "r") as f:
         ori_lines = f.readlines()
         ori_lines = [clean_web_text(d).strip() for d in ori_lines]
-        ori_lines = [" ".join(tokenizer(d)[-cfg.max_seq_length:]) for d in ori_lines]
+        ori_lines = [" ".join(d.split()[-cfg.max_seq_length:]) for d in ori_lines]
         data_per_worker = ceil(len(ori_lines) / cfg.replicas)
         start = cfg.worker_id * data_per_worker
         end = min(start + data_per_worker, len(ori_lines))
