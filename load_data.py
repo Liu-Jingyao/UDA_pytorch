@@ -22,7 +22,7 @@ import ast
 import csv
 import itertools
 
-import pandas as pd    # only import when no need_to_preprocessing
+import pandas as pd  # only import when no need_to_preprocessing
 from tqdm import tqdm
 
 import torch
@@ -31,76 +31,78 @@ from torch.utils.data import Dataset, DataLoader
 from utils import tokenization
 from utils.utils import truncate_tokens_pair
 
-def clean_web_text(st):
-  """clean text."""
-  st = st.replace("<br />", " ")
-  st = st.replace("&quot;", "\"")
-  st = st.replace("<p>", " ")
-  if "<a href=" in st:
-    # print("before:\n", st)
-    while "<a href=" in st:
-      start_pos = st.find("<a href=")
-      end_pos = st.find(">", start_pos)
-      if end_pos != -1:
-        st = st[:start_pos] + st[end_pos + 1:]
-      else:
-        print("incomplete href")
-        print("before", st)
-        st = st[:start_pos] + st[start_pos + len("<a href=")]
-        print("after", st)
 
-    st = st.replace("</a>", "")
-    # print("after\n", st)
-    # print("")
-  st = st.replace("\\n", " ")
-  st = st.replace("\\", " ")
-  # while "  " in st:
-  #   st = st.replace("  ", " ")
-  return st
+def clean_web_text(st):
+    """clean text."""
+    st = st.replace("<br />", " ")
+    st = st.replace("&quot;", "\"")
+    st = st.replace("<p>", " ")
+    if "<a href=" in st:
+        # print("before:\n", st)
+        while "<a href=" in st:
+            start_pos = st.find("<a href=")
+            end_pos = st.find(">", start_pos)
+            if end_pos != -1:
+                st = st[:start_pos] + st[end_pos + 1:]
+            else:
+                print("incomplete href")
+                print("before", st)
+                st = st[:start_pos] + st[start_pos + len("<a href=")]
+                print("after", st)
+
+        st = st.replace("</a>", "")
+        # print("after\n", st)
+        # print("")
+    st = st.replace("\\n", " ")
+    st = st.replace("\\", " ")
+    # while "  " in st:
+    #   st = st.replace("  ", " ")
+    return st
+
 
 class CsvDataset(Dataset):
     labels = None
+
     def __init__(self, file, need_prepro, pipeline, max_len, mode, d_type):
         Dataset.__init__(self)
         self.cnt = 0
 
         # need preprocessing
         if need_prepro:
-            num_lines = sum(1 for _ in open(file))
             with open(file, 'r', encoding='utf-8') as f:
                 lines = csv.reader(f, delimiter='\t', quotechar='"')
 
                 # supervised dataset
                 if d_type == 'sup':
                     # if mode == 'eval':
-                        # sentences = []
+                    # sentences = []
                     data = []
 
                     print("tokenizing sup/eval data...")
-                    for instance in tqdm(self.get_sup(lines), total=num_lines):
+                    for instance in tqdm(self.get_sup(lines), total=len(lines)):
                         # if mode == 'eval':
-                            # sentences.append([instance[1]])
+                        # sentences.append([instance[1]])
                         for proc in pipeline:
                             instance = proc(instance, d_type)
                         data.append(instance)
 
                     self.tensors = [torch.tensor(x, dtype=torch.long) for x in zip(*data)]
                     # if mode == 'eval':
-                        # self.tensors.append(sentences)
+                    # self.tensors.append(sentences)
 
                 # unsupervised dataset
                 elif d_type == 'unsup':
-                    data = {'ori':[], 'aug':[]}
+                    data = {'ori': [], 'aug': []}
                     print("tokenizing unsup data...")
-                    for ori, aug in tqdm(self.get_unsup(lines), total=num_lines):
+                    for ori, aug in tqdm(self.get_unsup(lines), total=len(lines)):
                         for proc in pipeline:
                             ori = proc(ori, d_type)
                             aug = proc(aug, d_type)
                         self.cnt += 1
                         # if self.cnt == 10:
-                            # break
-                        data['ori'].append(ori)    # drop label_id
-                        data['aug'].append(aug)    # drop label_id
+                        # break
+                        data['ori'].append(ori)  # drop label_id
+                        data['aug'].append(aug)  # drop label_id
                     ori_tensor = [torch.tensor(x, dtype=torch.long) for x in zip(*data['ori'])]
                     aug_tensor = [torch.tensor(x, dtype=torch.long) for x in zip(*data['aug'])]
                     self.tensors = ori_tensor + aug_tensor
@@ -112,21 +114,33 @@ class CsvDataset(Dataset):
             f = open(file, 'r', encoding='utf-8')
             data = pd.read_csv(f, sep='\t')
 
+            def with_bar_update(bar, x):
+                bar.update(1)
+                return x
+
             # supervised dataset
             if d_type == 'sup':
-                # input_ids, segment_ids(input_type_ids), input_mask, input_label
-                input_columns = ['input_ids', 'input_type_ids', 'input_mask', 'label_ids']
-                self.tensors = [torch.tensor(data[c].apply(lambda x: ast.literal_eval(x)), dtype=torch.long)    \
-                                                                                for c in input_columns[:-1]]
-                self.tensors.append(torch.tensor(data[input_columns[-1]], dtype=torch.long))
-                
+                print("loading sup/eval data...")
+                with tqdm(total=len(data)) as pbar:
+                    # input_ids, segment_ids(input_type_ids), input_mask, input_label
+                    input_columns = ['input_ids', 'input_type_ids', 'input_mask', 'label_ids']
+
+                    self.tensors = [
+                        torch.tensor(data[c].apply(lambda x: with_bar_update(pbar, ast.literal_eval(x))), dtype=torch.long) \
+                        for c in input_columns[:-1]]
+                    self.tensors.append(torch.tensor(data[input_columns[-1]], dtype=torch.long))
+                print("finished.")
+
             # unsupervised dataset
             elif d_type == 'unsup':
-                input_columns = ['ori_input_ids', 'ori_input_type_ids', 'ori_input_mask',
-                                 'aug_input_ids', 'aug_input_type_ids', 'aug_input_mask']
-                self.tensors = [torch.tensor(data[c].apply(lambda x: ast.literal_eval(x)), dtype=torch.long)    \
-                                                                                for c in input_columns]
-                
+                print("loading unsup data...")
+                with tqdm(total=len(data)) as pbar:
+                    input_columns = ['ori_input_ids', 'ori_input_type_ids', 'ori_input_mask',
+                                     'aug_input_ids', 'aug_input_type_ids', 'aug_input_mask']
+                    self.tensors = [
+                        torch.tensor(data[c].apply(lambda x: with_bar_update(pbar, ast.literal_eval(x))), dtype=torch.long) \
+                        for c in input_columns]
+                print("finished.")
             else:
                 raise "d_type error. (d_type have to sup or unsup)"
 
@@ -159,7 +173,7 @@ class Tokenizing(Pipeline):
 
     def __call__(self, instance, d_type):
         label, text_a, text_b = instance
-        
+
         label = self.preprocessor(label) if label else None
         tokens_a = self.tokenize(self.preprocessor(text_a))
         tokens_b = self.tokenize(self.preprocessor(text_b)) if text_b else []
@@ -171,7 +185,7 @@ class AddSpecialTokensWithTruncation(Pipeline):
     def __init__(self, max_len=512):
         super().__init__()
         self.max_len = max_len
-    
+
     def __call__(self, instance, d_type):
         label, tokens_a, tokens_b = instance
 
@@ -190,7 +204,7 @@ class AddSpecialTokensWithTruncation(Pipeline):
 class TokenIndexing(Pipeline):
     def __init__(self, indexer, labels, max_len=512):
         super().__init__()
-        self.indexer = indexer # function : tokens to indexes
+        self.indexer = indexer  # function : tokens to indexes
         # map from a label name to a label index
         self.label_map = {name: i for i, name in enumerate(labels)}
         self.max_len = max_len
@@ -199,15 +213,15 @@ class TokenIndexing(Pipeline):
         label, tokens_a, tokens_b = instance
 
         input_ids = self.indexer(tokens_a + tokens_b)
-        segment_ids = [0]*len(tokens_a) + [1]*len(tokens_b) # type_ids
-        input_mask = [1]*(len(tokens_a) + len(tokens_b))
+        segment_ids = [0] * len(tokens_a) + [1] * len(tokens_b)  # type_ids
+        input_mask = [1] * (len(tokens_a) + len(tokens_b))
         label_id = self.label_map[label] if label else None
 
         # zero padding
         n_pad = self.max_len - len(input_ids)
-        input_ids.extend([0]*n_pad)
-        segment_ids.extend([0]*n_pad)
-        input_mask.extend([0]*n_pad)
+        input_ids.extend([0] * n_pad)
+        segment_ids.extend([0] * n_pad)
+        input_mask.extend([0] * n_pad)
 
         if label_id != None:
             return (input_ids, segment_ids, input_mask, label_id)
@@ -222,12 +236,13 @@ def dataset_class(task):
 
 class IMDB(CsvDataset):
     labels = ('0', '1')
+
     def __init__(self, file, need_prepro, pipeline=[], max_len=512, mode='train', d_type='sup'):
         super().__init__(file, need_prepro, pipeline, max_len, mode, d_type)
 
     def get_sup(self, lines):
         for line in itertools.islice(lines, 0, None):
-            yield line[0], line[1], []    # label, text_a, None
+            yield line[0], line[1], []  # label, text_a, None
             # yield None, line[6], []
 
     def get_unsup(self, lines):
@@ -244,23 +259,24 @@ class load_data:
         if cfg.need_prepro:
             tokenizer = tokenization.FullTokenizer(vocab_file=cfg.vocab, do_lower_case=cfg.do_lower_case)
             self.pipeline = [Tokenizing(tokenizer.convert_to_unicode, tokenizer.tokenize),
-                        AddSpecialTokensWithTruncation(cfg.max_seq_length),
-                        TokenIndexing(tokenizer.convert_tokens_to_ids, self.TaskDataset.labels, cfg.max_seq_length)]
-        
+                             AddSpecialTokensWithTruncation(cfg.max_seq_length),
+                             TokenIndexing(tokenizer.convert_tokens_to_ids, self.TaskDataset.labels,
+                                           cfg.max_seq_length)]
+
         if cfg.mode == 'train':
             self.sup_data_dir = cfg.sup_data_dir
             self.sup_batch_size = cfg.train_batch_size
             self.shuffle = True
         elif cfg.mode == 'train_eval':
             self.sup_data_dir = cfg.sup_data_dir
-            self.eval_data_dir= cfg.eval_data_dir
+            self.eval_data_dir = cfg.eval_data_dir
             self.sup_batch_size = cfg.train_batch_size
             self.eval_batch_size = cfg.eval_batch_size
             self.shuffle = True
         elif cfg.mode == 'eval':
             self.eval_data_dir = cfg.eval_data_dir
             self.eval_batch_size = cfg.eval_batch_size
-            self.shuffle = False                            # Not shuffel when eval mode
+            self.shuffle = False  # Not shuffel when eval mode
         elif cfg.mode == 'tokenize':
             self.sup_data_dir = cfg.sup_data_dir
             self.eval_data_dir = cfg.eval_data_dir
@@ -270,33 +286,39 @@ class load_data:
             self.unsup_batch_size = cfg.train_batch_size * cfg.unsup_ratio
             self.shuffle = False
 
-        if cfg.uda_mode:                                    # Only uda_mode
+        if cfg.uda_mode:  # Only uda_mode
             self.unsup_data_dir = cfg.unsup_data_dir
             self.unsup_batch_size = cfg.train_batch_size * cfg.unsup_ratio
 
     def sup_data_iter(self):
-        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, self.cfg.mode, 'sup')
+        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length,
+                                       self.cfg.mode, 'sup')
         sup_data_iter = DataLoader(sup_dataset, batch_size=self.sup_batch_size, shuffle=self.shuffle)
-        
+
         return sup_data_iter
 
     def unsup_data_iter(self):
-        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, self.cfg.mode, 'unsup')
+        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline,
+                                         self.cfg.max_seq_length, self.cfg.mode, 'unsup')
         unsup_data_iter = DataLoader(unsup_dataset, batch_size=self.unsup_batch_size, shuffle=self.shuffle)
 
         return unsup_data_iter
 
     def eval_data_iter(self):
-        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'eval', 'sup')
+        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline,
+                                        self.cfg.max_seq_length, 'eval', 'sup')
         eval_data_iter = DataLoader(eval_dataset, batch_size=self.eval_batch_size, shuffle=False)
 
         return eval_data_iter
 
     def get_all_dataset(self):
         print("tokenizing sup data...")
-        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'sup')
+        sup_dataset = self.TaskDataset(self.sup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length,
+                                       'tokenize', 'sup')
         print("tokenizing unsup data...")
-        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'unsup')
+        unsup_dataset = self.TaskDataset(self.unsup_data_dir, self.cfg.need_prepro, self.pipeline,
+                                         self.cfg.max_seq_length, 'tokenize', 'unsup')
         print("tokenizing eval data...")
-        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline, self.cfg.max_seq_length, 'tokenize', 'sup')
+        eval_dataset = self.TaskDataset(self.eval_data_dir, self.cfg.need_prepro, self.pipeline,
+                                        self.cfg.max_seq_length, 'tokenize', 'sup')
         return sup_dataset, unsup_dataset, eval_dataset
