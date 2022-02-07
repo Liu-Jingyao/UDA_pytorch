@@ -79,7 +79,7 @@ class CsvDataset(Dataset):
                     data = []
 
                     print("tokenizing sup/eval data...")
-                    for instance in tqdm(self.get_sup(lines), total=len(lines)):
+                    for instance in tqdm(self.get_sup(lines), total=len(lines.index)):
                         # if mode == 'eval':
                         # sentences.append([instance[1]])
                         for proc in pipeline:
@@ -121,7 +121,7 @@ class CsvDataset(Dataset):
             # supervised dataset
             if d_type == 'sup':
                 print("loading sup/eval data...")
-                with tqdm(total=len(data)) as pbar:
+                with tqdm(total=len(data.index)) as pbar:
                     # input_ids, segment_ids(input_type_ids), input_mask, input_label
                     input_columns = ['input_ids', 'input_type_ids', 'input_mask', 'label_ids']
 
@@ -134,7 +134,7 @@ class CsvDataset(Dataset):
             # unsupervised dataset
             elif d_type == 'unsup':
                 print("loading unsup data...")
-                with tqdm(total=len(data)) as pbar:
+                with tqdm(total=len(data.index)) as pbar:
                     input_columns = ['ori_input_ids', 'ori_input_type_ids', 'ori_input_mask',
                                      'aug_input_ids', 'aug_input_type_ids', 'aug_input_mask']
                     self.tensors = [
