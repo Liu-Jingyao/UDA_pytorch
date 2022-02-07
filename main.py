@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
+import re
 from math import ceil
 
 import fire
@@ -43,11 +44,13 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
     output = threshold * (end - start) + start
     return output.to(_get_device())
 
+
 def unsup_data_augmentation(cfg):
     with open(cfg.unsup_data_dir, "r") as f:
         ori_lines = f.readlines()
+        def tokenizer(sen): return re.findall(r"[\w']+|[.,!?;]", sen)
         ori_lines = [clean_web_text(d).strip() for d in ori_lines]
-        ori_lines = [" ".join(d.split()[-cfg.max_seq_length:]) for d in ori_lines]
+        ori_lines = [" ".join(tokenizer(d)[-cfg.max_seq_length:]) for d in ori_lines]
         data_per_worker = ceil(len(ori_lines) / cfg.replicas)
         start = cfg.worker_id * data_per_worker
         end = min(start + data_per_worker, len(ori_lines))
@@ -55,7 +58,8 @@ def unsup_data_augmentation(cfg):
         print("processing data from %d to %d" % (start, end - 1))
     aug_lines = copy.deepcopy(ori_lines)
     if cfg.aug_ops.startswith("bt"):
-        aug_lines = sent_level_augment.run_augment(aug_lines, cfg.aug_ops, cfg.aug_copy_num, cfg.aug_batch_size, cfg.max_seq_length)
+        aug_lines = sent_level_augment.run_augment(aug_lines, cfg.aug_ops, cfg.aug_copy_num, cfg.aug_batch_size,
+                                                   cfg.max_seq_length)
     else:
         aug_lines = word_level_augment.run_augment(aug_lines, cfg.aug_ops, tokenizer, cfg.aug_copy_num)
     ori_aug_lines = [(ori_lines[i // cfg.aug_copy_num].rstrip(), aug_lines[i]) for i in range(len(aug_lines))]
