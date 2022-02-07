@@ -94,7 +94,7 @@ class CsvDataset(Dataset):
                 elif d_type == 'unsup':
                     data = {'ori': [], 'aug': []}
                     print("tokenizing unsup data...")
-                    for ori, aug in tqdm(self.get_unsup(lines), total=len(lines)):
+                    for ori, aug in tqdm(self.get_unsup(lines), total=len(lines.index)):
                         for proc in pipeline:
                             ori = proc(ori, d_type)
                             aug = proc(aug, d_type)
@@ -114,33 +114,25 @@ class CsvDataset(Dataset):
             f = open(file, 'r', encoding='utf-8')
             data = pd.read_csv(f, sep='\t')
 
-            def with_bar_update(bar, x):
-                bar.update(1)
-                return x
-
             # supervised dataset
             if d_type == 'sup':
-                print("loading sup/eval data...")
-                with tqdm(total=len(data.index)) as pbar:
-                    # input_ids, segment_ids(input_type_ids), input_mask, input_label
-                    input_columns = ['input_ids', 'input_type_ids', 'input_mask', 'label_ids']
+                tqdm.pandas(desc="loading sup/eval data")
+                # input_ids, segment_ids(input_type_ids), input_mask, input_label
+                input_columns = ['input_ids', 'input_type_ids', 'input_mask', 'label_ids']
 
-                    self.tensors = [
-                        torch.tensor(data[c].apply(lambda x: with_bar_update(pbar, ast.literal_eval(x))), dtype=torch.long) \
-                        for c in input_columns[:-1]]
-                    self.tensors.append(torch.tensor(data[input_columns[-1]], dtype=torch.long))
-                print("finished.")
+                self.tensors = [
+                    torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long) \
+                    for c in input_columns[:-1]]
+                self.tensors.append(torch.tensor(data[input_columns[-1]], dtype=torch.long))
 
             # unsupervised dataset
             elif d_type == 'unsup':
-                print("loading unsup data...")
-                with tqdm(total=len(data.index)) as pbar:
-                    input_columns = ['ori_input_ids', 'ori_input_type_ids', 'ori_input_mask',
-                                     'aug_input_ids', 'aug_input_type_ids', 'aug_input_mask']
-                    self.tensors = [
-                        torch.tensor(data[c].apply(lambda x: with_bar_update(pbar, ast.literal_eval(x))), dtype=torch.long) \
-                        for c in input_columns]
-                print("finished.")
+                tqdm.pandas(desc="loading unsup data")
+                input_columns = ['ori_input_ids', 'ori_input_type_ids', 'ori_input_mask',
+                                 'aug_input_ids', 'aug_input_type_ids', 'aug_input_mask']
+                self.tensors = [
+                    torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long) \
+                    for c in input_columns]
             else:
                 raise "d_type error. (d_type have to sup or unsup)"
 
