@@ -3,6 +3,9 @@ import copy
 import json
 import math
 import string
+import random
+random.seed(0)
+
 import numpy as np
 import re
 from string import punctuation
@@ -10,54 +13,6 @@ from string import punctuation
 from tqdm import tqdm
 
 printable = set(string.printable)
-
-
-def filter_unicode(st):
-    return "".join([c for c in st if c in printable])
-
-
-def build_vocab(data):
-    vocab = {}
-
-    def add_to_vocab(word_list):
-        for word in word_list:
-            if word not in vocab:
-                vocab[word] = len(vocab)
-
-    for i in range(len(data)):
-        add_to_vocab(data[i])
-    return vocab
-
-
-def get_data_stats(data):
-    """Compute the IDF score for each word. Then compute the TF-IDF score."""
-    word_doc_freq = collections.defaultdict(int)
-    # Compute IDF
-    print("computing IDF")
-    for i in tqdm(range(len(data))):
-        cur_word_dict = {}
-        cur_sent = copy.deepcopy(data[i])
-        for word in cur_sent:
-            cur_word_dict[word] = 1
-        for word in cur_word_dict:
-            word_doc_freq[word] += 1
-    idf = {}
-    for word in word_doc_freq:
-        idf[word] = math.log(len(data) * 1. / word_doc_freq[word])
-    # Compute TF-IDF
-    tf_idf = {}
-    print("computing TF-IDF")
-    for i in tqdm(range(len(data))):
-        cur_word_dict = {}
-        cur_sent = copy.deepcopy(data[i])
-        for word in cur_sent:
-            if word not in tf_idf:
-                tf_idf[word] = 0
-            tf_idf[word] += 1. / len(cur_sent) * idf[word]
-    return {
-        "idf": idf,
-        "tf_idf": tf_idf,
-    }
 
 
 class EfficientRandomGen(object):
@@ -168,6 +123,59 @@ class TfIdfWordRep(EfficientRandomGen):
         # print("sampled token list: {:s}".format(
         #     filter_unicode(" ".join(self.token_list))))
 
+    @staticmethod
+    def get_data_stats(data):
+        """Compute the IDF score for each word. Then compute the TF-IDF score."""
+        word_doc_freq = collections.defaultdict(int)
+        # Compute IDF
+        print("computing IDF")
+        for i in tqdm(range(len(data))):
+            cur_word_dict = {}
+            cur_sent = copy.deepcopy(data[i])
+            for word in cur_sent:
+                cur_word_dict[word] = 1
+            for word in cur_word_dict:
+                word_doc_freq[word] += 1
+        idf = {}
+        for word in word_doc_freq:
+            idf[word] = math.log(len(data) * 1. / word_doc_freq[word])
+        # Compute TF-IDF
+        tf_idf = {}
+        print("computing TF-IDF")
+        for i in tqdm(range(len(data))):
+            cur_word_dict = {}
+            cur_sent = copy.deepcopy(data[i])
+            for word in cur_sent:
+                if word not in tf_idf:
+                    tf_idf[word] = 0
+                tf_idf[word] += 1. / len(cur_sent) * idf[word]
+        return {
+            "idf": idf,
+            "tf_idf": tf_idf,
+        }
+
+class PunctuationsWordInsert:
+
+    def __init__(self, punc_ratio=0.3):
+        self.PUNCTUATIONS = ['.', ',', '!', '?', ';', ':']
+        self.punc_ratio = punc_ratio
+
+    # Insert punction words into a given sentence with the given ratio "punc_ratio"
+    def __call__(self, sentence):
+        words = sentence.split(' ')
+        aug_sentence = []
+        q = random.randint(1, int(self.punc_ratio * len(words) + 1))
+        qs = random.sample(range(0, len(words)), q)
+
+        for j, word in enumerate(words):
+            if j in qs:
+                aug_sentence.append(self.PUNCTUATIONS[random.randint(0, len(self.PUNCTUATIONS) - 1)])
+                aug_sentence.append(word)
+            else:
+                aug_sentence.append(word)
+        aug_sentence = ' '.join(aug_sentence)
+        return aug_sentence
+
 
 def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
     print("word level augmentation using %s..." % aug_ops.split("-")[0])
@@ -175,7 +183,7 @@ def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
         if aug_ops.startswith("tf_idf"):
             ori_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
             # data = [get_only_chars(sup).strip().split(" ") for sup in ori_lines]
-            data_stats = get_data_stats(ori_lines)
+            data_stats = TfIdfWordRep.get_data_stats(ori_lines)
 
             print("\n>>Using augmentation {}".format(aug_ops))
             token_prob = float(aug_ops.split("-")[1])
@@ -184,5 +192,12 @@ def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
             aug_lines = []
             for i in tqdm(range(len(ori_lines) * aug_copy_num)):
                 aug_lines.append(" ".join(op(ori_lines[i // aug_copy_num])))
+            return aug_lines
+        elif aug_ops.startswith("punc_insert"):
+            token_prob = float(aug_ops.split("-")[1])
+            op = PunctuationsWordInsert(token_prob)
+            aug_lines = []
+            for i in tqdm(range(len(ori_lines) * aug_copy_num)):
+                aug_lines.append(op(ori_lines[i // aug_copy_num]))
             return aug_lines
     return ori_lines
