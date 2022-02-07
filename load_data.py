@@ -66,6 +66,7 @@ class CsvDataset(Dataset):
 
         # need preprocessing
         if need_prepro:
+            num_lines = sum(1 for _ in open(file))
             with open(file, 'r', encoding='utf-8') as f:
                 lines = csv.reader(f, delimiter='\t', quotechar='"')
 
@@ -76,7 +77,7 @@ class CsvDataset(Dataset):
                     data = []
 
                     print("tokenizing sup/eval data...")
-                    for instance in tqdm(self.get_sup(lines)):
+                    for instance in tqdm(self.get_sup(lines), total=num_lines):
                         # if mode == 'eval':
                             # sentences.append([instance[1]])
                         for proc in pipeline:
@@ -91,7 +92,7 @@ class CsvDataset(Dataset):
                 elif d_type == 'unsup':
                     data = {'ori':[], 'aug':[]}
                     print("tokenizing unsup data...")
-                    for ori, aug in tqdm(self.get_unsup(lines)):
+                    for ori, aug in tqdm(self.get_unsup(lines), total=num_lines):
                         for proc in pipeline:
                             ori = proc(ori, d_type)
                             aug = proc(aug, d_type)
