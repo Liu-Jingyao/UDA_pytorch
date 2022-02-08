@@ -120,7 +120,7 @@ class CsvDataset(Dataset):
                 input_columns = ['input_ids', 'input_type_ids', 'input_mask', 'label_ids']
                 self.tensors = []
                 for i, c in enumerate(input_columns[:-1]):
-                    tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns[:-1]) + 1))
+                    tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns[:-1])))
                     self.tensors.append(torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
                 self.tensors.append(torch.tensor(data[input_columns[-1]], dtype=torch.long))
 
@@ -131,7 +131,7 @@ class CsvDataset(Dataset):
                                  'aug_input_ids', 'aug_input_type_ids', 'aug_input_mask']
                 self.tensors = []
                 for i, c in enumerate(input_columns):
-                    tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns) + 1))
+                    tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns)))
                     self.tensors.append(torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
             else:
                 raise "d_type error. (d_type have to sup or unsup)"
