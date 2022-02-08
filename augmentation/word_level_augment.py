@@ -128,8 +128,7 @@ class TfIdfWordRep(EfficientRandomGen):
         """Compute the IDF score for each word. Then compute the TF-IDF score."""
         word_doc_freq = collections.defaultdict(int)
         # Compute IDF
-        print("computing IDF")
-        for i in tqdm(range(len(data))):
+        for i in tqdm(range(len(data)), desc="Computing IDF"):
             cur_word_dict = {}
             cur_sent = copy.deepcopy(data[i])
             for word in cur_sent:
@@ -141,8 +140,7 @@ class TfIdfWordRep(EfficientRandomGen):
             idf[word] = math.log(len(data) * 1. / word_doc_freq[word])
         # Compute TF-IDF
         tf_idf = {}
-        print("computing TF-IDF")
-        for i in tqdm(range(len(data))):
+        for i in tqdm(range(len(data)), desc="Computing TF-IDF"):
             cur_word_dict = {}
             cur_sent = copy.deepcopy(data[i])
             for word in cur_sent:
@@ -178,7 +176,7 @@ class PunctuationsWordInsert:
 
 
 def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
-    print("word level augmentation using %s..." % aug_ops.split("-")[0])
+    print("\nword level augmentation using %s..." % aug_ops.split("-")[0])
     if aug_ops:
         if aug_ops.startswith("tf_idf"):
             ori_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
