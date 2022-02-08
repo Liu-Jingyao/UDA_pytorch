@@ -79,7 +79,6 @@ class CsvDataset(Dataset):
                     # sentences = []
                     data = []
 
-                    print("tokenizing sup/eval data...")
                     for instance in tqdm(self.get_sup(lines), total=num_lines):
                         # if mode == 'eval':
                         # sentences.append([instance[1]])
@@ -94,7 +93,6 @@ class CsvDataset(Dataset):
                 # unsupervised dataset
                 elif d_type == 'unsup':
                     data = {'ori': [], 'aug': []}
-                    print("tokenizing unsup data...")
                     for ori, aug in tqdm(self.get_unsup(lines), total=num_lines):
                         for proc in pipeline:
                             ori = proc(ori, d_type)
@@ -120,10 +118,10 @@ class CsvDataset(Dataset):
                 tqdm.pandas(desc="loading sup/eval data")
                 # input_ids, segment_ids(input_type_ids), input_mask, input_label
                 input_columns = ['input_ids', 'input_type_ids', 'input_mask', 'label_ids']
-
-                self.tensors = [
-                    torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long) \
-                    for c in input_columns[:-1]]
+                self.tensors = []
+                for i, c in enumerate(input_columns[:-1]):
+                    tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns[:-1]) + 1))
+                    self.tensors.append(torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
                 self.tensors.append(torch.tensor(data[input_columns[-1]], dtype=torch.long))
 
             # unsupervised dataset
@@ -131,9 +129,10 @@ class CsvDataset(Dataset):
                 tqdm.pandas(desc="loading unsup data")
                 input_columns = ['ori_input_ids', 'ori_input_type_ids', 'ori_input_mask',
                                  'aug_input_ids', 'aug_input_type_ids', 'aug_input_mask']
-                self.tensors = [
-                    torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long) \
-                    for c in input_columns]
+                self.tensors = []
+                for i, c in enumerate(input_columns):
+                    tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns) + 1))
+                    self.tensors.append(torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
             else:
                 raise "d_type error. (d_type have to sup or unsup)"
 
