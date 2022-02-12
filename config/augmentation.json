@@ -4,7 +4,7 @@
 
     "unsup_data_dir": "data/imdb_unsup_train.txt",
 
-    "aug_ops": ["tf_idf-0.3", "punc_insert-0.3"],
+    "aug_ops": ["w-unif-0.3"],
 
     "aug_copy_num": 1,
     "aug_batch_size": 16,

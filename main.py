@@ -24,7 +24,7 @@ import torch.nn.functional as F
 
 import models
 import train
-from augmentation import sent_level_augment, word_level_augment
+from augmentation import sent_level_augment, word_level_augment, tool_augment
 from load_data import load_data
 from utils.utils import set_seeds, get_device, _get_device, torch_device_one, clean_web_text
 from utils import optim, configuration
@@ -48,7 +48,9 @@ def get_tsa_thresh(schedule, global_step, num_train_steps, start, end):
 def unsup_data_augmentation(cfg):
     with open(cfg.unsup_data_dir, "r") as f:
         ori_lines = f.readlines()
+
         def tokenizer(sen): return re.findall(r"[\w']+|[.,!?;]", sen)
+
         ori_lines = [clean_web_text(d).strip() for d in ori_lines]
         ori_lines = [" ".join(tokenizer(d)[-cfg.max_seq_length:]) for d in ori_lines]
         data_per_worker = ceil(len(ori_lines) / cfg.replicas)
@@ -60,11 +62,15 @@ def unsup_data_augmentation(cfg):
     if not isinstance(cfg.aug_ops, list):
         cfg.aug_ops = [cfg.aug_ops]
     for aug_op in cfg.aug_ops:
-        if aug_op.startswith("bt"):
-            aug_lines = sent_level_augment.run_augment(aug_lines, aug_op, cfg.aug_copy_num, cfg.aug_batch_size,
+        if aug_op.startswith("s"):
+            aug_lines = sent_level_augment.run_augment(aug_lines, aug_op[2:], cfg.aug_copy_num,
+                                                       cfg.aug_batch_size,
                                                        cfg.max_seq_length)
-        else:
-            aug_lines = word_level_augment.run_augment(aug_lines, aug_op, tokenizer, cfg.aug_copy_num)
+        elif aug_op.startswith("w"):
+            aug_lines = word_level_augment.run_augment(aug_lines, aug_op[2:], tokenizer, cfg.aug_copy_num)
+        elif aug_op.startswith("t"):
+            aug_lines = tool_augment.run_augment(aug_lines, aug_op[2:], cfg.aug_copy_num, cfg.aug_batch_size,
+                                                 cfg.max_seq_length)
     ori_aug_lines = [(ori_lines[i // cfg.aug_copy_num].rstrip(), aug_lines[i]) for i in range(len(aug_lines))]
     return ori_aug_lines
 

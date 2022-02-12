@@ -4,6 +4,7 @@ import json
 import math
 import string
 import random
+
 random.seed(0)
 
 import numpy as np
@@ -39,6 +40,48 @@ class EfficientRandomGen(object):
         if self.token_ptr == -1:
             self.reset_token_list()
         return token
+
+
+class UnifRep(EfficientRandomGen):
+    """Uniformly replace word with random words in the vocab."""
+
+    def __init__(self, token_prob, vocab):
+        self.token_prob = token_prob
+        self.vocab_size = len(vocab)
+        self.vocab = vocab
+        self.reset_token_list()
+        self.reset_random_prob()
+
+    def __call__(self, data):
+        data = self.replace_tokens(data)
+        return data
+
+    def replace_tokens(self, tokens):
+        """Replace tokens randomly."""
+        if len(tokens) >= 3:
+            for i in range(len(tokens)):
+                if self.get_random_prob() < self.token_prob:
+                    tokens[i] = self.get_random_token()
+        return tokens
+
+    def reset_token_list(self):
+        """Generate many random tokens at the same time and cache them."""
+        self.token_list = list(self.vocab.keys())
+        self.token_ptr = len(self.token_list) - 1
+        np.random.shuffle(self.token_list)
+
+    @staticmethod
+    def build_vocab(data):
+        vocab = {}
+
+        def add_to_vocab(word_list):
+            for word in word_list:
+                if word not in vocab:
+                    vocab[word] = len(vocab)
+
+        for i in range(len(data)):
+            add_to_vocab(data[i])
+        return vocab
 
 
 class TfIdfWordRep(EfficientRandomGen):
@@ -88,8 +131,8 @@ class TfIdfWordRep(EfficientRandomGen):
         all_words = copy.deepcopy(data)
 
         # if show_data:
-            # print("before tf_idf_unif aug: {:s}".format(
-            #     filter_unicode(" ".join(all_words))))
+        # print("before tf_idf_unif aug: {:s}".format(
+        #     filter_unicode(" ".join(all_words))))
 
         replace_prob = self.get_replace_prob(all_words)
         data = self.replace_tokens(
@@ -97,10 +140,6 @@ class TfIdfWordRep(EfficientRandomGen):
             replace_prob[:len(data)]
         )
 
-        # if show_data:
-        #     all_words = copy.deepcopy(data)
-            # print("after tf_idf_unif aug: {:s}".format(
-            #     filter_unicode(" ".join(all_words))))
         return data
 
     def replace_tokens(self, word_list, replace_prob):
@@ -120,8 +159,6 @@ class TfIdfWordRep(EfficientRandomGen):
         for idx in token_list_idx:
             self.token_list += [self.tf_idf_keys[idx]]
         self.token_ptr = len(self.token_list) - 1
-        # print("sampled token list: {:s}".format(
-        #     filter_unicode(" ".join(self.token_list))))
 
     @staticmethod
     def get_data_stats(data):
@@ -152,8 +189,8 @@ class TfIdfWordRep(EfficientRandomGen):
             "tf_idf": tf_idf,
         }
 
-class PunctuationsWordInsert:
 
+class PunctuationsWordInsert:
     def __init__(self, punc_ratio=0.3):
         self.PUNCTUATIONS = ['.', ',', '!', '?', ';', ':']
         self.punc_ratio = punc_ratio
@@ -175,18 +212,25 @@ class PunctuationsWordInsert:
         return aug_sentence
 
 
+
 def run_augment(ori_lines, aug_ops, tokenizer, aug_copy_num):
     print("\nword level augmentation using %s..." % aug_ops.split("-")[0])
     if aug_ops:
-        if aug_ops.startswith("tf_idf"):
+        if aug_ops.startswith("unif"):
+            ori_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
+            token_prob = float(aug_ops.split("-")[1])
+            word_vocab = UnifRep.build_vocab(ori_lines)
+            op = UnifRep(token_prob, word_vocab)
+            aug_lines = []
+            for i in tqdm(range(len(ori_lines) * aug_copy_num)):
+                aug_lines.append(" ".join(op(ori_lines[i // aug_copy_num])))
+            return aug_lines
+        elif aug_ops.startswith("tf_idf"):
             ori_lines = [tokenizer(d) for d in copy.deepcopy(ori_lines)]
             # data = [get_only_chars(sup).strip().split(" ") for sup in ori_lines]
             data_stats = TfIdfWordRep.get_data_stats(ori_lines)
-
-            print("\n>>Using augmentation {}".format(aug_ops))
             token_prob = float(aug_ops.split("-")[1])
             op = TfIdfWordRep(token_prob, data_stats)
-
             aug_lines = []
             for i in tqdm(range(len(ori_lines) * aug_copy_num)):
                 aug_lines.append(" ".join(op(ori_lines[i // aug_copy_num])))
