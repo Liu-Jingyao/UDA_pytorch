@@ -243,7 +243,7 @@ class IMDB(CsvDataset):
 
 
 class YELP5(CsvDataset):
-    labels = ('1', '2', '3', '4', '5')
+    labels = ('0', '1', '2', '3', '4')
 
     def __init__(self, file, need_prepro, pipeline=[], max_len=512, mode='train', d_type='sup'):
         super().__init__(file, need_prepro, pipeline, max_len, mode, d_type)
