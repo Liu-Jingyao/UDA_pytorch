@@ -121,7 +121,8 @@ class CsvDataset(Dataset):
                 self.tensors = []
                 for i, c in enumerate(input_columns[:-1]):
                     tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns[:-1])))
-                    self.tensors.append(torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
+                    self.tensors.append(
+                        torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
                 self.tensors.append(torch.tensor(data[input_columns[-1]], dtype=torch.long))
 
             # unsupervised dataset
@@ -132,7 +133,8 @@ class CsvDataset(Dataset):
                 self.tensors = []
                 for i, c in enumerate(input_columns):
                     tqdm.pandas(desc="loading unsup data %d/%d" % (i + 1, len(input_columns)))
-                    self.tensors.append(torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
+                    self.tensors.append(
+                        torch.tensor(data[c].progress_apply(lambda x: ast.literal_eval(x)), dtype=torch.long))
             else:
                 raise "d_type error. (d_type have to sup or unsup)"
 
@@ -222,12 +224,28 @@ class TokenIndexing(Pipeline):
 
 
 def dataset_class(task):
-    table = {'imdb': IMDB}
+    table = {'imdb': IMDB, "yelp-5": YELP5}
     return table[task]
 
 
 class IMDB(CsvDataset):
     labels = ('0', '1')
+
+    def __init__(self, file, need_prepro, pipeline=[], max_len=512, mode='train', d_type='sup'):
+        super().__init__(file, need_prepro, pipeline, max_len, mode, d_type)
+
+    def get_sup(self, lines):
+        for line in itertools.islice(lines, 0, None):
+            yield line[0], line[1], []  # label, text_a, None
+            # yield None, line[6], []
+
+    def get_unsup(self, lines):
+        for line in itertools.islice(lines, 0, None):
+            yield (None, line[0], []), (None, line[1], [])  # ko, en
+
+
+class YELP5(CsvDataset):
+    labels = ('1', '2', '3', '4', '5')
 
     def __init__(self, file, need_prepro, pipeline=[], max_len=512, mode='train', d_type='sup'):
         super().__init__(file, need_prepro, pipeline, max_len, mode, d_type)

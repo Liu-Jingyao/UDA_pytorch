@@ -11,7 +11,7 @@
     "unsup_data_dir": "data/imdb_unsup_train_aug.txt",
 
     "vocab":"BERT_Medium_Uncased/vocab.txt",
-    "task": "imdb",
+    "task": "yelp-5",
 
     "is_position": false
 }
