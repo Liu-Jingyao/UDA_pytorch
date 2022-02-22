@@ -22,4 +22,4 @@ wget https://storage.googleapis.com/bert_models/2020_02_20/uncased_L-8_H-512_A-8
 unzip uncased_L-8_H-512_A-8.zip -d BERT_Medium_Uncased && rm uncased_L-8_H-512_A-8.zip
 
 # **** unzip data ****
-unzip data.zip && rm data.zip
+#unzip data.zip && rm data.zip

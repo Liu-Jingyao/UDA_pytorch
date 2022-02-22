@@ -109,7 +109,17 @@ def main(cfg, model_cfg):
     data = load_data(cfg)
     data_iter = dict()
     if cfg.uda_mode:
-        unsup_criterion = nn.KLDivLoss(reduction='none')
+        def js_div(p_output, q_output, get_softmax=True):
+            """
+            Function that measures JS divergence between target and output logits:
+            """
+            KLDivLoss = nn.KLDivLoss(reduction='batchmean')
+            if get_softmax:
+                p_output = F.softmax(p_output)
+                q_output = F.softmax(q_output)
+            log_mean_output = ((p_output + q_output) / 2).log()
+            return (KLDivLoss(log_mean_output, p_output) + KLDivLoss(log_mean_output, q_output)) / 2
+        unsup_criterion = js_div
         if cfg.mode == 'train':
             data_iter['sup_iter'] = data.sup_data_iter()
             data_iter['unsup_iter'] = data.unsup_data_iter()
@@ -235,4 +245,4 @@ def main(cfg, model_cfg):
 
 if __name__ == '__main__':
     fire.Fire(main)
-    # main('config/uda.json', 'config/bert_base.json')
+    # main('config/uda_yelp5.json', 'config/bert_base.json')

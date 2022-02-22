@@ -26,7 +26,7 @@
     "model_file":null,
     "pretrain_file":"BERT_Medium_Uncased/bert_model.ckpt",
     "vocab":"BERT_Medium_Uncased/vocab.txt",
-    "task": "yelp-5",
+    "task": "imdb",
 
     "save_steps": 1000,
     "check_steps": 1000,

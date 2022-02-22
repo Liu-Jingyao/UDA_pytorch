@@ -1,0 +1,36 @@
+{
+    "seed": 42,
+    "lr": 2e-5,
+    "warmup": 0.1,
+    "do_lower_case": true,
+    "mode": "train_eval",
+    "uda_mode": true,
+
+    "total_steps": 10000,
+    "max_seq_length": 512,
+    "train_batch_size": 1,
+    "eval_batch_size": 16,
+
+    "unsup_ratio": 1,
+    "uda_coeff": 1,
+    "tsa": "linear_schedule",
+    "uda_softmax_temp": 0.85,
+    "uda_confidence_thresh": 0.15,
+
+    "data_parallel": true,
+    "need_prepro": false,
+    "sup_data_dir": "data/yelp5_sup_train_tokenized.txt",
+    "unsup_data_dir": "data/yelp5_unsup_train_tokenized.txt",
+    "eval_data_dir": "data/yelp5_sup_test_tokenized.txt",
+
+    "model_file":null,
+    "pretrain_file":"BERT_Medium_Uncased/bert_model.ckpt",
+    "vocab":"BERT_Medium_Uncased/vocab.txt",
+    "task": "yelp-5",
+
+    "save_steps": 1000,
+    "check_steps": 1000,
+    "results_dir": "results",
+
+    "is_position": false
+}
