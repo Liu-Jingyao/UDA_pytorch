@@ -113,12 +113,14 @@ def main(cfg, model_cfg):
             """
             Function that measures JS divergence between target and output logits:
             """
-            KLDivLoss = nn.KLDivLoss(reduction='batchmean')
+            KLDivLoss = nn.KLDivLoss(reduction='none')
             if get_softmax:
                 p_output = F.softmax(p_output)
                 q_output = F.softmax(q_output)
             log_mean_output = ((p_output + q_output) / 2).log()
             return (KLDivLoss(log_mean_output, p_output) + KLDivLoss(log_mean_output, q_output)) / 2
+
+        # unsup_criterion = nn.KLDivLoss(reduction='none')
         unsup_criterion = js_div
         if cfg.mode == 'train':
             data_iter['sup_iter'] = data.sup_data_iter()
